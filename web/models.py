@@ -4,7 +4,7 @@ from bynamodb.model import Model
 
 class Coordinate(Model):
 
-    __fixtures__ = 'universities', 'recruit_exp'
+    __fixtures__ = 'university', 'recruit_exp'
 
     name = StringAttribute(hash_key=True)
     group = StringAttribute()
