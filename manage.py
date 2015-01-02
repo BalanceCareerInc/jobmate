@@ -12,7 +12,7 @@ def init_db():
     from web import models
 
     def load_fixture(model, fixture):
-        with open(os.path.join('fixtures', fixture), 'r') as f:
+        with open(os.path.join('fixtures', '%s.json' % fixture), 'r') as f:
             for row in json.loads(f.read()):
                 model.put_item(**row)
 
