@@ -1,0 +1,7 @@
+Flask
+pytest-flask
+flask-compress
+gunicorn
+gevent
+boto
+-e git+https://github.com/teddychoi/BynamoDB.git@master#egg=bynamodb
