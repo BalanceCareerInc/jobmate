@@ -35,15 +35,14 @@ def make_random_name():
 
 
 def test_pairing():
-    group_keys = ['university', 'recruit_exp']
     groups = dict()
-    for group in group_keys:
+    for group in Coordinate.GROUPS:
         coordinate = Coordinate.scan(group__eq=group)
         groups[group] = list(coordinate)
 
     users = []
     for x in xrange(100):
-        coordinates = [random.sample(groups[group], 1)[0] for group in group_keys]
+        coordinates = [random.sample(groups[group], 1)[0] for group in Coordinate.GROUPS]
         user = User.put_item(
             username=make_random_name(),
             coordinates=[int(c.value) for c in coordinates]
