@@ -35,7 +35,7 @@ def make_random_name():
 
 
 def test_pairing():
-    group_keys = ['university', 'exp']
+    group_keys = ['university', 'recruit_exp']
     groups = dict()
     for group in group_keys:
         coordinate = Coordinate.scan(group__eq=group)
