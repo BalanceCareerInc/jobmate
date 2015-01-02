@@ -1,10 +1,7 @@
 # -*-coding:utf8-*-
 import argparse
 import os
-
-parser = argparse.ArgumentParser()
-parser.add_argument('command', choices=['initdb'])
-args = parser.parse_args()
+from web.app import create_app
 
 
 def init_db():
@@ -17,6 +14,7 @@ def init_db():
     def load_fixture(model, fixture):
         with open(os.path.join('fixtures', fixture), 'r') as f:
             for row in json.loads(f.read()):
+                print row
                 model.put_item(**row)
 
     conn = DynamoDBConnection()
@@ -30,5 +28,12 @@ def init_db():
             [load_fixture(model, fixture) for fixture in getattr(model, '__fixtures__', [])]
 
 
-if args.command == 'initdb':
-    init_db()
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('command', choices=['initdb', 'runserver'])
+    args = parser.parse_args()
+
+    if args.command == 'initdb':
+        init_db()
+    elif args.command == 'runserver':
+        create_app('localconfig.py').run(host='0', port=9338, debug=True)
