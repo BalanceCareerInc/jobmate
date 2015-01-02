@@ -1,10 +1,10 @@
 # -*-coding:utf8-*-
-from bynamodb.attributes import StringAttribute, NumberAttribute
+from bynamodb.attributes import StringAttribute, NumberAttribute, StringSetAttribute, ListAttribute
 from bynamodb.model import Model
 
 
 class Coordinate(Model):
-    GROUPS = 'university', 'recruit_exp'
+    GROUPS = 'university', 'recruit_exp', 'goal_companies'
     __fixtures__ = GROUPS
 
     name = StringAttribute(hash_key=True)
@@ -15,31 +15,44 @@ class Coordinate(Model):
     def normalize(cls, group, value):
         normalizer = getattr(cls, '_normalize_%s' % group, None)
         if not normalizer:
-            return value
+            return [cls.get_item(value).value]
         return normalizer(value)
 
     @classmethod
     def _normalize_recruit_exp(cls, value):
-        return u'공채%d회' % min(value, 2)
+        return [cls.get_item(u'공채%d회' % min(value, 2)).value]
+
+    @classmethod
+    def _normalize_goal_companies(cls, value):
+        value = reduce(
+            lambda x, y: x+y,
+            [[company] * 2 * (3-i) for i, company in enumerate(value)]
+        )
+        companies = sorted([company.name for company in cls.scan(group__eq='goal_companies')])
+        return [value.count(company) for company in companies]
 
 
 class User(Model):
     username = StringAttribute(hash_key=True)
     university = StringAttribute()
     recruit_exp = NumberAttribute()
+    goal_companies = ListAttribute()
 
     @property
     def coordinates(self):
         return [
-            Coordinate.get_item(Coordinate.normalize(group, getattr(self, group))).value
+            value
             for group in Coordinate.GROUPS
+            for value in Coordinate.normalize(group, getattr(self, group))
         ]
 
     def __repr__(self):
+        def printable(x):
+            if type(x) in (tuple, list):
+                x = ','.join(x)
+            return unicode(x).encode('utf8')
+
         return '<User: %s/%s>' % (
             self.username.encode('utf8'),
-            '/'.join([
-                unicode(getattr(self, group)).encode('utf8')
-                for group in Coordinate.GROUPS
-            ])
+            '/'.join([printable(getattr(self, group))for group in Coordinate.GROUPS])
         )
