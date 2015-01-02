@@ -4,4 +4,4 @@ flask-compress
 gunicorn
 gevent
 -e git+https://github.com/Gaechi/boto.git@49ccffed3587ce627ec7aa54af0e0db301848650#egg=boto
--e git+https://github.com/teddychoi/BynamoDB.git@master#egg=bynamodb
+-e git+https://github.com/Gaechi/BynamoDB.git@master#egg=bynamodb
