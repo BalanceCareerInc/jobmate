@@ -1,5 +1,4 @@
 # -*-coding:utf8-*-
-from baseconfig import *
 DEBUG = True
 
 DYNAMODB_HOST = 'localhost'
