@@ -14,7 +14,6 @@ def init_db():
     def load_fixture(model, fixture):
         with open(os.path.join('fixtures', fixture), 'r') as f:
             for row in json.loads(f.read()):
-                print row
                 model.put_item(**row)
 
     conn = DynamoDBConnection()
