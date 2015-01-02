@@ -37,17 +37,16 @@ def make_random_name():
 def test_pairing():
     groups = dict()
     for group in Coordinate.GROUPS:
-        coordinate = Coordinate.scan(group__eq=group)
-        groups[group] = list(coordinate)
+        groups[group] = list(Coordinate.scan(group__eq=group))
 
     users = []
     for x in xrange(100):
-        coordinates = [random.sample(groups[group], 1)[0] for group in Coordinate.GROUPS]
+        university = random.sample(groups['university'], 1)[0].name
         user = User.put_item(
             username=make_random_name(),
-            coordinates=[int(c.value) for c in coordinates]
+            university=university,
+            recruit_exp=random.randint(0, 3)
         )
-        user.tmp = '/'.join([c.name for c in coordinates])
         users.append(user)
 
     print '\n'
@@ -55,7 +54,7 @@ def test_pairing():
     for u1, u2 in pairs:
         u1 = [u for u in users if u.username == u1.username][0]
         u2 = [u for u in users if u.username == u2.username][0]
-        print u1.username+':', u1.tmp
-        print u2.username+':', u2.tmp
+        print u1
+        print u2
         print
     assert 0
