@@ -4,7 +4,11 @@ from bynamodb.model import Model
 
 
 class Coordinate(Model):
-    GROUPS = 'university', 'recruit_exp', 'goal_companies'
+    GROUPS = dict(
+        university=10,
+        recruit_exp=10,
+        goal_companies=9
+    )
     __fixtures__ = GROUPS
 
     name = StringAttribute(hash_key=True)
@@ -16,7 +20,7 @@ class Coordinate(Model):
         normalizer = getattr(cls, '_normalize_%s' % group, None)
         if not normalizer:
             return [cls.get_item(value).value]
-        return normalizer(value)
+        return normalizer(value) * cls.GROUPS[group]
 
     @classmethod
     def _normalize_recruit_exp(cls, value):
@@ -26,7 +30,7 @@ class Coordinate(Model):
     def _normalize_goal_companies(cls, value):
         value = reduce(
             lambda x, y: x+y,
-            [[company] * 2 * (3-i) for i, company in enumerate(value)]
+            [[company] * (3-i) for i, company in enumerate(value)]
         )
         companies = sorted([company.name for company in cls.scan(group__eq='goal_companies')])
         return [value.count(company) for company in companies]
@@ -42,7 +46,7 @@ class User(Model):
     def coordinates(self):
         return [
             value
-            for group in Coordinate.GROUPS
+            for group in Coordinate.GROUPS.keys()
             for value in Coordinate.normalize(group, getattr(self, group))
         ]
 
@@ -54,5 +58,5 @@ class User(Model):
 
         return '<User: %s/%s>' % (
             self.username.encode('utf8'),
-            '/'.join([printable(getattr(self, group))for group in Coordinate.GROUPS])
+            '/'.join([printable(getattr(self, group))for group in Coordinate.GROUPS.keys()])
         )

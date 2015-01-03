@@ -37,7 +37,7 @@ def make_random_name():
 
 def test_pairing():
     groups = dict()
-    for group in Coordinate.GROUPS:
+    for group in Coordinate.GROUPS.keys():
         groups[group] = list(Coordinate.scan(group__eq=group))
 
     users = []
