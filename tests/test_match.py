@@ -1,6 +1,5 @@
 # -*-coding:utf8-*-
 import random
-import numpy
 from web.matching import pairing
 from web.models import User, Coordinate
 
@@ -45,6 +44,7 @@ def test_pairing():
         university = random.sample(groups['university'], 1)[0].name
         user = User.put_item(
             username=make_random_name(),
+            gender=['M', 'F'][random.randint(0, 1)],
             university=university,
             recruit_exp=random.randint(0, 3),
             goal_companies=[c.name for c in random.sample(groups['goal_companies'], 3)]
@@ -53,11 +53,11 @@ def test_pairing():
 
     print '\n'
     pairs = pairing(users)
+    print len(pairs)
     for u1, u2 in pairs:
         u1 = [u for u in users if u.username == u1.username][0]
         u2 = [u for u in users if u.username == u2.username][0]
         print u1
         print u2
-        print numpy.linalg.norm(numpy.array(u1.coordinates) - numpy.array(u2.coordinates))
         print
     assert 0

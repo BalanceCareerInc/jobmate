@@ -1,5 +1,6 @@
 # -*-coding:utf8-*-
-from bynamodb.attributes import StringAttribute, NumberAttribute, StringSetAttribute, ListAttribute
+from werkzeug.utils import cached_property
+from bynamodb.attributes import StringAttribute, NumberAttribute, ListAttribute
 from bynamodb.model import Model
 
 
@@ -38,11 +39,12 @@ class Coordinate(Model):
 
 class User(Model):
     username = StringAttribute(hash_key=True)
+    gender = StringAttribute()
     university = StringAttribute()
     recruit_exp = NumberAttribute()
     goal_companies = ListAttribute()
 
-    @property
+    @cached_property
     def coordinates(self):
         return [
             value
@@ -56,7 +58,8 @@ class User(Model):
                 x = ','.join(x)
             return unicode(x).encode('utf8')
 
-        return '<User: %s/%s>' % (
+        return '<User: %s/%s/%s>' % (
             self.username.encode('utf8'),
+            self.gender,
             '/'.join([printable(getattr(self, group))for group in Coordinate.GROUPS.keys()])
         )
