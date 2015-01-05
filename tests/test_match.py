@@ -36,28 +36,38 @@ def make_random_name():
 
 def test_pairing():
     groups = dict()
-    for group in Coordinate.GROUPS.keys():
+    for group in Coordinate.GROUP_WEIGHT.keys():
         groups[group] = list(Coordinate.scan(group__eq=group))
 
-    users = []
+    group_users = dict((name, []) for name in Coordinate.GROUP_NAMES)
     for x in xrange(300):
-        university = random.sample(groups['university'], 1)[0].name
+        group_name = random.sample(Coordinate.GROUP_NAMES, 1)[0]
+        matching_info = dict(
+            university=random.sample(groups['university'], 1)[0].name,
+            age=random.randint(20, 30),
+            looking_for_now=group_name.startswith('NOW'),
+        )
+        if matching_info['looking_for_now']:
+            matching_info.update(
+                recruit_exp=random.randint(0, 3),
+                goal_companies=[c.name for c in random.sample(groups['goal_companies'], 3)]
+            )
         user = User.put_item(
+            group_name=group_name,
             username=make_random_name(),
             gender=['M', 'F'][random.randint(0, 1)],
-            university=university,
-            recruit_exp=random.randint(0, 3),
-            goal_companies=[c.name for c in random.sample(groups['goal_companies'], 3)]
+            matching_info=matching_info
         )
-        users.append(user)
+        group_users[group_name].append(user)
 
-    print '\n'
-    pairs = pairing(users)
-    print len(pairs)
-    for u1, u2 in pairs:
-        u1 = [u for u in users if u.username == u1.username][0]
-        u2 = [u for u in users if u.username == u2.username][0]
-        print u1
-        print u2
-        print
+    for group, users in group_users.iteritems():
+        print group
+        pairs = pairing(users)
+        print len(pairs)
+        for u1, u2 in pairs:
+            u1 = [u for u in users if u.username == u1.username][0]
+            u2 = [u for u in users if u.username == u2.username][0]
+            print u1
+            print u2
+            print
     assert 0
