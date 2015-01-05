@@ -74,5 +74,6 @@ def _pairing_by_brute(users):
             distance = numpy.linalg.norm(numpy.array(user.coordinates) - numpy.array(female.coordinates))
             min_distance = min(min_distance, (distance, user))
         users = [user for user in users if user != min_distance[1] and user != female]
-        pairs.append((female, min_distance[1]))
+        if min_distance[1] is not None:
+            pairs.append((female, min_distance[1]))
     return pairs
