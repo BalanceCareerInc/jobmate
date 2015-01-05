@@ -1,6 +1,7 @@
 # -*-coding:utf8-*-
 import argparse
 import os
+from chat.server import run
 from web.app import create_app
 
 
@@ -36,3 +37,5 @@ if __name__ == '__main__':
         init_db()
     elif args.command == 'runserver':
         create_app('localconfig.py').run(host='0', port=9338, debug=True)
+    elif args.command == 'runchatserver':
+        run()

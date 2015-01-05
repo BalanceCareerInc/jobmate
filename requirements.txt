@@ -6,6 +6,13 @@ gevent
 -e git+https://github.com/Gaechi/boto.git@develop#egg=boto
 -e git+https://github.com/Gaechi/BynamoDB.git@master#egg=bynamodb
 
+#machine learning
 numpy
 scipy
 scikit-learn
+
+
+#chat
+twisted
+redis
+bson
