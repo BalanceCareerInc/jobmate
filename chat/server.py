@@ -2,21 +2,23 @@
 from threading import Thread
 
 import redis
-
 from twisted.internet import reactor
-from twisted.internet.protocol import Protocol, Factory
+from twisted.internet.protocol import Factory
+
+from chat.dna.protocol import DnaProtocol, ProtocolError
 
 
-class ChatProtocol(Protocol):
+class ChatProtocol(DnaProtocol):
     channel = None
 
-    def dataReceived(self, data):
+    def requestReceived(self, request):
         if self.channel is None:
-            # TODO: Authentication
-            self.channel = data
+            if request.method != 'joinChannel':
+                raise ProtocolError('Must join in the channel')
+            self.channel = request['channel']
             self.factory.channels.setdefault(self.channel, []).append(self)
         else:
-            self.factory.session.publish(self.channel, data)
+            self.factory.session.publish(self.channel, request['message'])
 
     def connectionLost(self, reason=None):
         print reason
