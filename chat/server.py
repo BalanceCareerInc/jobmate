@@ -29,9 +29,13 @@ class ChatProtocol(DnaProtocol):
 
     @must_be_in_channel
     def do_publish(self, request):
-        message = bson.dumps(dict(
-            message=request['message'], writer=self.user, published_at=time.time()
-        ))
+        message = dict(
+            message=request['message'],
+            writer=self.user,
+            published_at=time.time(),
+            method=u'publish'
+        )
+        message = bson.dumps(message)
         self.factory.session.publish(self.channel, message)
 
     def connectionLost(self, reason=None):
@@ -59,10 +63,8 @@ class RedisSubscriber(Thread):
         pubsub.psubscribe('*')
         pubsub.listen().next()
         for message in pubsub.listen():
-            data = message['data']
-            data['method'] = 'publish'
             for client in self.factory.channels[message['channel']]:
-                client.transport.write(data)
+                client.transport.write(message['data'])
 
 
 def run():
