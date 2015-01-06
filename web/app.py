@@ -9,7 +9,7 @@ from web.session import RedisSessionInterface
 
 def create_app(config_file='baseconfig.py'):
     app = Flask(__name__)
-    config_file = os.path.join(os.path.split(os.path.abspath(__file__))[0], config_file)
+    config_file = os.path.join(os.getcwd(), 'conf', config_file)
     app.config.from_pyfile(config_file)
     Compress(app)
     patch_dynamodb_connection(
