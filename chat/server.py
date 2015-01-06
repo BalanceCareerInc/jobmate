@@ -1,8 +1,10 @@
 # -*-coding:utf8-*-
-from threading import Thread
 import bson
-
 import redis
+import time
+
+from threading import Thread
+
 from twisted.internet import reactor
 from twisted.internet.protocol import Factory
 from chat.decorators import must_be_in_channel
@@ -12,6 +14,7 @@ from chat.dna.protocol import DnaProtocol, ProtocolError
 
 class ChatProtocol(DnaProtocol):
     channel = None
+    user = None
 
     def requestReceived(self, request):
         processor = getattr(self, 'do_%s' % request.method, None)
@@ -19,13 +22,16 @@ class ChatProtocol(DnaProtocol):
             raise ProtocolError('Unknown method')
         processor(request)
 
-    def do_join_channel(self, request):
+    def do_authenticate(self, request):
         self.channel = request['channel']
+        self.user = request['user']
         self.factory.channels.setdefault(self.channel, []).append(self)
 
     @must_be_in_channel
     def do_publish(self, request):
-        message = bson.dumps(dict(message=request['message']))
+        message = bson.dumps(dict(
+            message=request['message'], writer=self.user, published_at=time.time()
+        ))
         self.factory.session.publish(self.channel, message)
 
     def connectionLost(self, reason=None):
@@ -53,8 +59,10 @@ class RedisSubscriber(Thread):
         pubsub.psubscribe('*')
         pubsub.listen().next()
         for message in pubsub.listen():
+            data = message['data']
+            data['method'] = 'publish'
             for client in self.factory.channels[message['channel']]:
-                client.transport.write(message['data'])
+                client.transport.write(data)
 
 
 def run():
