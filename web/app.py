@@ -4,6 +4,7 @@ from flask import Flask
 from flask.ext.compress import Compress
 
 from bynamodb import patch_dynamodb_connection
+from web.session import RedisSessionInterface
 
 
 def create_app(config_file='baseconfig.py'):
@@ -16,4 +17,5 @@ def create_app(config_file='baseconfig.py'):
         port=app.config['DYNAMODB_PORT'],
         is_secure=app.config['DYNAMODB_IS_SECURE'],
     )
+    app.session_interface = RedisSessionInterface()
     return app
