@@ -6,12 +6,12 @@ from bynamodb.model import Model
 
 class Coordinate(Model):
     DEFAULT_GROUPS = 'university', 'age'
-    GROUP_NAMES = 'FUTURE_ETC', 'NOW_ETC'
+    GROUP_TYPE_CRITERIA = 'looking_for_now', 'orientation'
     GROUP_WEIGHT = dict(
         university=10,
         recruit_exp=10,
         goal_companies=9,
-        age=5
+        age=2
     )
     __fixtures__ = 'university', 'recruit_exp', 'goal_companies'
 
@@ -20,9 +20,18 @@ class Coordinate(Model):
     value = NumberAttribute()
 
     @classmethod
+    def group_type_of(cls, user):
+        criteria = (user.matching_info.get(group) for group in cls.GROUP_TYPE_CRITERIA)
+        return tuple(criterion for criterion in criteria if criterion)
+
+    @classmethod
     def of(cls, user):
+        group_type_name = {
+            (True, 'etc'): 'now_etc',
+            (False, 'etc'): 'future_etc'
+        }[user.group_type]
         groups = list(Coordinate.DEFAULT_GROUPS) + \
-            getattr(cls, '_groups_of_%s' % user.group_name)(user)
+            getattr(cls, '_groups_of_%s' % group_type_name)(user)
         normalizer = CoordinateNormalizer()
         return [
             value
@@ -31,11 +40,11 @@ class Coordinate(Model):
         ]
 
     @classmethod
-    def _groups_of_FUTURE_ETC(cls, user):
+    def _groups_of_future_etc(cls, user):
         return []
 
     @classmethod
-    def _groups_of_NOW_ETC(cls, user):
+    def _groups_of_now_etc(cls, user):
         return ['recruit_exp', 'goal_companies']
 
 
@@ -53,8 +62,8 @@ class CoordinateNormalizer(object):
     @staticmethod
     def _normalize_goal_companies(value):
         value = reduce(
-            lambda x, y: x+y,
-            [[company] * (3-i) for i, company in enumerate(value)]
+            lambda x, y: x + y,
+            [[company] * (3 - i) for i, company in enumerate(value)]
         )
         companies = sorted([
             company.name
@@ -64,14 +73,20 @@ class CoordinateNormalizer(object):
 
     @staticmethod
     def _normalize_age(value):
-        return [(value - 20)]
+        value -= 20
+        if value < 4:
+            value -= 2
+        return [value]
 
 
 class User(Model):
     username = StringAttribute(hash_key=True)
     gender = StringAttribute()
-    group_name = StringAttribute()
     matching_info = MapAttribute()
+
+    @cached_property
+    def group_type(self):
+        return Coordinate.group_type_of(self)
 
     @cached_property
     def coordinates(self):

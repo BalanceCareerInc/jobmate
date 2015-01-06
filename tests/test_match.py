@@ -1,5 +1,8 @@
 # -*-coding:utf8-*-
 import random
+
+from collections import defaultdict
+
 from web.matching import pairing
 from web.models import User, Coordinate
 
@@ -39,13 +42,13 @@ def test_pairing():
     for group in Coordinate.GROUP_WEIGHT.keys():
         groups[group] = list(Coordinate.scan(group__eq=group))
 
-    group_users = dict((name, []) for name in Coordinate.GROUP_NAMES)
+    group_users = defaultdict(list)
     for x in xrange(300):
-        group_name = random.sample(Coordinate.GROUP_NAMES, 1)[0]
         matching_info = dict(
             university=random.sample(groups['university'], 1)[0].name,
             age=random.randint(20, 30),
-            looking_for_now=group_name.startswith('NOW'),
+            looking_for_now=bool(random.randint(0, 1)),
+            orientation='etc'
         )
         if matching_info['looking_for_now']:
             matching_info.update(
@@ -53,12 +56,11 @@ def test_pairing():
                 goal_companies=[c.name for c in random.sample(groups['goal_companies'], 3)]
             )
         user = User.put_item(
-            group_name=group_name,
             username=make_random_name(),
             gender=['M', 'F'][random.randint(0, 1)],
             matching_info=matching_info
         )
-        group_users[group_name].append(user)
+        group_users[user.group_type].append(user)
 
     for group, users in group_users.iteritems():
         print group
