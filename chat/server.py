@@ -4,6 +4,7 @@ from threading import Thread
 import redis
 from twisted.internet import reactor
 from twisted.internet.protocol import Factory
+from chat.decorators import must_be_in_channel
 
 from chat.dna.protocol import DnaProtocol, ProtocolError
 
@@ -12,13 +13,18 @@ class ChatProtocol(DnaProtocol):
     channel = None
 
     def requestReceived(self, request):
-        if self.channel is None:
-            if request.method != 'joinChannel':
-                raise ProtocolError('Must join in the channel')
-            self.channel = request['channel']
-            self.factory.channels.setdefault(self.channel, []).append(self)
-        else:
-            self.factory.session.publish(self.channel, request['message'])
+        processor = getattr(self, 'do_%s' % request.method, None)
+        if processor is None:
+            raise ProtocolError('Unknown method')
+        processor(request)
+
+    def do_join_channel(self, request):
+        self.channel = request['channel']
+        self.factory.channels.setdefault(self.channel, []).append(self)
+
+    @must_be_in_channel
+    def do_publish(self, request):
+        self.factory.session.publish(self.channel, request['message'])
 
     def connectionLost(self, reason=None):
         print reason
