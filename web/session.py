@@ -2,7 +2,7 @@
 import bson
 from datetime import timedelta
 from uuid import uuid4
-from redis import Redis
+from redis import StrictRedis
 from werkzeug.datastructures import CallbackDict
 from flask.sessions import SessionInterface, SessionMixin
 
@@ -22,10 +22,8 @@ class RedisSessionInterface(SessionInterface):
     serializer = bson
     session_class = RedisSession
 
-    def __init__(self, redis=None, prefix='session:'):
-        if redis is None:
-            redis = Redis()
-        self.redis = redis
+    def __init__(self, host='localhost', prefix='session:'):
+        self.redis = StrictRedis(host)
         self.prefix = prefix
 
     def generate_sid(self):

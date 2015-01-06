@@ -17,5 +17,5 @@ def create_app(config_file='baseconfig.py'):
         port=app.config['DYNAMODB_PORT'],
         is_secure=app.config['DYNAMODB_IS_SECURE'],
     )
-    app.session_interface = RedisSessionInterface()
+    app.session_interface = RedisSessionInterface(app.config['REDIS_HOST'])
     return app
