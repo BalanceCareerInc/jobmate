@@ -1,5 +1,6 @@
 # -*-coding:utf8-*-
 from threading import Thread
+import bson
 
 import redis
 from twisted.internet import reactor
@@ -24,7 +25,8 @@ class ChatProtocol(DnaProtocol):
 
     @must_be_in_channel
     def do_publish(self, request):
-        self.factory.session.publish(self.channel, request['message'])
+        message = bson.dumps(dict(message=request['message']))
+        self.factory.session.publish(self.channel, message)
 
     def connectionLost(self, reason=None):
         print reason

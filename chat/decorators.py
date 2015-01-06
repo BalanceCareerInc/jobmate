@@ -9,5 +9,5 @@ def must_be_in_channel(func):
     def wrapper(self, *args, **kwargs):
         if self.channel is None:
             raise ProtocolError
-        return func(*args, **kwargs)
+        return func(self, *args, **kwargs)
     return wrapper
