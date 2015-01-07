@@ -17,7 +17,9 @@ from models import User, Message
 
 
 class ChatProtocol(DnaProtocol):
-    user = None
+    def __init__(self):
+        self.user = None
+        self.status = 'pending'
 
     def requestReceived(self, request):
         processor = getattr(self, 'do_%s' % request.method, None)
@@ -33,14 +35,11 @@ class ChatProtocol(DnaProtocol):
                 published_at=float(message.published_at),
                 message=message.message
             ) for message in messages]
+            self.factory.channels.setdefault(self.user.channel, []).append(self)
             self.transport.write(bson.dumps(dict(method=u'unread', messages=messages)))
 
-        def connect_to_channel(result):
-            self.factory.channels.setdefault(self.user.channel, []).append(self)
-
         self.user = User.query(username__eq=request['user']).next()
-        d = deferToThread(send_unread_messages, self.user.channel, request['last_published_at'])
-        d.addCallback(connect_to_channel)
+        deferToThread(send_unread_messages, self.user.channel, request['last_published_at'])
 
     @must_be_in_channel
     def do_publish(self, request):
