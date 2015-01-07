@@ -9,5 +9,6 @@ class DnaProtocol(Protocol):
     def dataReceived(self, raw_bson):
         try:
             self.requestReceived(Request.from_bson(raw_bson))
-        except ProtocolError:
+        except ProtocolError, e:
+            print e
             self.transport.loseConnection()
