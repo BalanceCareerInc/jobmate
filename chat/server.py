@@ -8,6 +8,7 @@ from threading import Thread
 
 from twisted.internet import reactor
 from twisted.internet.protocol import Factory
+from chat import get_config
 from chat.decorators import must_be_in_channel
 
 from chat.dna.protocol import DnaProtocol, ProtocolError
@@ -71,13 +72,7 @@ class RedisSubscriber(Thread):
 
 
 def run(config_file='localconfig'):
-    with open('../conf/%s' % config_file, 'r') as f:
-        data = f.read()
-    config = dict()
-    default = dict()
-    exec '' in default
-    exec data in config
-    config = dict((k, v) for k, v in config.iteritems() if k not in default)
+    config = get_config(config_file)
     patch_dynamodb_connection(
         host=config['DYNAMODB_HOST'],
         port=config['DYNAMODB_PORT'],
