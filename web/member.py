@@ -15,6 +15,7 @@ def register():
         default_keys = ['gender'] + list(Coordinate.DEFAULT_GROUPS)
         if not all([key in params for key in default_keys]):
             return None
+        params.update(looking_for_now=True, orientation='etc')
         return params
     cleaned_params = clean(request.json)
     if cleaned_params is None:
@@ -22,6 +23,6 @@ def register():
     user = User.put_item(
         username=str(uuid1()),
         gender=cleaned_params.pop('gender'),
-        matching_info=cleaned_params
+        matching_info=cleaned_params,
     )
     return jsonify(username=user.username)

@@ -45,6 +45,7 @@ class Coordinate(Model):
 
     @classmethod
     def _groups_of_now_etc(cls, user):
+        return []
         return ['recruit_exp', 'goal_companies']
 
 
@@ -73,6 +74,7 @@ class CoordinateNormalizer(object):
 
     @staticmethod
     def _normalize_age(value):
+        value = int(value)
         value -= 20
         if value < 4:
             value -= 2
@@ -98,11 +100,13 @@ class User(Model):
         def printable(x):
             if type(x) in (tuple, list):
                 x = ','.join(x)
-            return unicode(x).encode('utf8')
+            elif type(x) is unicode:
+                x = x.encode('utf8')
+            return str(x)
 
         return '<User: %s/%s/%s>' % (
-            self.username.encode('utf8'),
-            self.gender,
+            printable(self.username),
+            printable(self.gender),
             '/'.join([
                 '%s: %s' % (printable(k), printable(v))
                 for k, v in self.matching_info.iteritems()

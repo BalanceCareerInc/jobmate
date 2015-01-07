@@ -1,5 +1,6 @@
 # -*-coding:utf8-*-
 import bson
+from bynamodb import patch_dynamodb_connection
 import redis
 import time
 
@@ -10,6 +11,7 @@ from twisted.internet.protocol import Factory
 from chat.decorators import must_be_in_channel
 
 from chat.dna.protocol import DnaProtocol, ProtocolError
+from models import User
 
 
 class ChatProtocol(DnaProtocol):
@@ -23,8 +25,9 @@ class ChatProtocol(DnaProtocol):
         processor(request)
 
     def do_authenticate(self, request):
-        self.channel = request['channel']
         self.user = request['user']
+        user = User.query(username__eq=self.user).next()
+        self.channel = user.channel
         self.factory.channels.setdefault(self.channel, []).append(self)
 
     @must_be_in_channel
@@ -67,10 +70,22 @@ class RedisSubscriber(Thread):
                 client.transport.write(message['data'])
 
 
-def run():
-    reactor.listenTCP(9338, ChatFactory())
+def run(config_file='localconfig'):
+    with open('../conf/%s' % config_file, 'r') as f:
+        data = f.read()
+    config = dict()
+    default = dict()
+    exec '' in default
+    exec data in config
+    config = dict((k, v) for k, v in config.iteritems() if k not in default)
+    patch_dynamodb_connection(
+        host=config['DYNAMODB_HOST'],
+        port=config['DYNAMODB_PORT'],
+        is_secure=config['DYNAMODB_IS_SECURE']
+    )
+    reactor.listenTCP(9339, ChatFactory(config['REDIS_HOST']))
     reactor.run()
 
 
 if __name__ == '__main__':
-    run()
+    run('localconfig.py')
