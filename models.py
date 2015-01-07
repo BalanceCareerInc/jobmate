@@ -108,3 +108,10 @@ class User(Model):
                 for k, v in self.matching_info.iteritems()
             ])
         )
+
+
+class Message(Model):
+    channel = StringAttribute(hash_key=True)
+    published_at = NumberAttribute(range_key=True)
+    user = StringAttribute()
+    message = StringAttribute()

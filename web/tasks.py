@@ -1,10 +1,10 @@
 # -*-coding:utf8-*-
 import time
 import uuid
-
 from collections import defaultdict
+
 from web.matching import Matcher
-from web.models import User
+from models import User
 
 
 def pairing():

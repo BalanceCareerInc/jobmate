@@ -1,10 +1,9 @@
 # -*-coding:utf8-*-
 import random
-
 from collections import defaultdict
 
 from web.matching import pairing
-from web.models import User, Coordinate
+from models import User, Coordinate
 
 
 def make_random_name():

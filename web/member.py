@@ -1,7 +1,10 @@
 # -*-coding:utf8-*-
 from uuid import uuid1
-from flask import Blueprint, request, abort
-from web.models import Coordinate, User
+
+from flask import Blueprint, request, abort, jsonify
+
+from models import Coordinate, User
+
 
 bp = Blueprint('member', __name__)
 
@@ -17,7 +20,8 @@ def register():
     if cleaned_params is None:
         return abort(400)
     user = User.put_item(
-        username=uuid1(),
+        username=str(uuid1()),
+        gender=cleaned_params.pop('gender'),
         matching_info=cleaned_params
     )
-    return user.username
+    return jsonify(username=user.username)

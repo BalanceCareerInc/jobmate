@@ -1,6 +1,7 @@
 # -*-coding:utf8-*-
 import argparse
 import os
+
 from chat.server import run
 from web.app import create_app
 
@@ -10,7 +11,7 @@ def init_db():
     import json
     from boto.dynamodb2.layer1 import DynamoDBConnection
     from bynamodb.model import Model
-    from web import models
+    import models
 
     def load_fixture(model, fixture):
         with open(os.path.join('fixtures', '%s.json' % fixture), 'r') as f:
@@ -34,6 +35,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.command == 'initdb':
+        create_app('localconfig.py')
         init_db()
     elif args.command == 'runserver':
         create_app('localconfig.py').run(host='0', port=9338, debug=True)
