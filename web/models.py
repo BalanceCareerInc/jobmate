@@ -82,6 +82,7 @@ class CoordinateNormalizer(object):
 class User(Model):
     username = StringAttribute(hash_key=True)
     partner = StringAttribute(null=True)
+    channel = StringAttribute(null=True)
     gender = StringAttribute()
     matching_info = MapAttribute()
 
