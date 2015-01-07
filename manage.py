@@ -2,14 +2,17 @@
 import argparse
 import os
 
+from boto.dynamodb2.layer1 import DynamoDBConnection
+from boto.dynamodb2.table import Table
+
 from chat.server import run
 from web.app import create_app
+from web.tasks import pairing
 
 
 def init_db():
     import inspect
     import json
-    from boto.dynamodb2.layer1 import DynamoDBConnection
     from bynamodb.model import Model
     import models
 
@@ -29,15 +32,27 @@ def init_db():
             [load_fixture(model, fixture) for fixture in getattr(model, '__fixtures__', [])]
 
 
+def reset_db():
+    conn = DynamoDBConnection()
+    table_names = conn.list_tables()['TableNames']
+    for table in table_names:
+        Table(table).delete()
+    init_db()
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('command', choices=['initdb', 'runserver'])
+    parser.add_argument('command', choices=['initdb', 'resetdb', 'runserver', 'pairing'])
     args = parser.parse_args()
+    app = create_app('localconfig.py')
 
     if args.command == 'initdb':
-        create_app('localconfig.py')
         init_db()
+    elif args.command == 'resetdb':
+        reset_db()
     elif args.command == 'runserver':
-        create_app('localconfig.py').run(host='0', port=9338, debug=True)
+        app.run(host='0', port=9338, debug=True)
     elif args.command == 'runchatserver':
         run()
+    elif args.command == 'pairing':
+        pairing()
