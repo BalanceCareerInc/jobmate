@@ -16,7 +16,6 @@ from models import User
 
 
 class ChatProtocol(DnaProtocol):
-    channel = None
     user = None
 
     def requestReceived(self, request):
@@ -26,26 +25,24 @@ class ChatProtocol(DnaProtocol):
         processor(request)
 
     def do_authenticate(self, request):
-        self.user = request['user']
-        user = User.query(username__eq=self.user).next()
-        self.channel = user.channel
-        self.factory.channels.setdefault(self.channel, []).append(self)
+        self.user = User.query(username__eq=request['user']).next()
+        self.factory.channels.setdefault(self.user.channel, []).append(self)
 
     @must_be_in_channel
     def do_publish(self, request):
         message = dict(
             message=request['message'],
-            writer=self.user,
+            writer=self.user.username,
             published_at=time.time(),
             method=u'publish'
         )
         message = bson.dumps(message)
-        self.factory.session.publish(self.channel, message)
+        self.factory.session.publish(self.user.channel, message)
 
     def connectionLost(self, reason=None):
         print reason
-        if self.channel is not None:
-            self.factory.channels[self.channel].remove(self)
+        if self.user and self.user.channel:
+            self.factory.channels[self.user.channel].remove(self)
 
 
 class ChatFactory(Factory):
