@@ -8,11 +8,12 @@ from threading import Thread
 
 from twisted.internet import reactor
 from twisted.internet.protocol import Factory
+from twisted.internet.threads import deferToThread
 from chat import get_config
 from chat.decorators import must_be_in_channel
 
 from chat.dna.protocol import DnaProtocol, ProtocolError
-from models import User
+from models import User, Message
 
 
 class ChatProtocol(DnaProtocol):
@@ -25,8 +26,21 @@ class ChatProtocol(DnaProtocol):
         processor(request)
 
     def do_authenticate(self, request):
+        def send_unread_messages(channel, published_at):
+            messages = Message.query(channel__eq=channel, published_at__gt=published_at)
+            messages = [dict(
+                writer=message.user,
+                published_at=float(message.published_at),
+                message=message.message
+            ) for message in messages]
+            self.transport.write(bson.dumps(dict(method=u'unread', messages=messages)))
+
+        def connect_to_channel(result):
+            self.factory.channels.setdefault(self.user.channel, []).append(self)
+
         self.user = User.query(username__eq=request['user']).next()
-        self.factory.channels.setdefault(self.user.channel, []).append(self)
+        d = deferToThread(send_unread_messages, self.user.channel, request['last_published_at'])
+        d.addCallback(connect_to_channel)
 
     @must_be_in_channel
     def do_publish(self, request):
