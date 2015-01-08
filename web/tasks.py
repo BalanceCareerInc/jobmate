@@ -15,8 +15,8 @@ def pairing():
         pairs = Matcher().match(users)
         for u1, u2 in pairs:
             channel = '%f-%s' % (time.time(), uuid.uuid1())
-            u1.partner = u2.username
-            u2.partner = u1.username
+            u1.partner = u2.id
+            u2.partner = u1.id
             u1.channel = channel
             u2.channel = channel
             u1.save()

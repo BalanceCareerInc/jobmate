@@ -55,7 +55,7 @@ def test_pairing():
                 goal_companies=[c.name for c in random.sample(groups['goal_companies'], 3)]
             )
         user = User.put_item(
-            username=make_random_name(),
+            id=make_random_name(),
             gender=['M', 'F'][random.randint(0, 1)],
             matching_info=matching_info
         )
@@ -66,8 +66,8 @@ def test_pairing():
         pairs = pairing(users)
         print len(pairs)
         for u1, u2 in pairs:
-            u1 = [u for u in users if u.username == u1.username][0]
-            u2 = [u for u in users if u.username == u2.username][0]
+            u1 = [u for u in users if u.id == u1.id][0]
+            u2 = [u for u in users if u.id == u2.id][0]
             print u1
             print u2
             print

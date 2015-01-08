@@ -50,7 +50,7 @@ class ChatProtocol(DnaProtocol):
         def ready_to_receive(result):
             self.status = 'stable'
 
-        self.user = User.query(username__eq=request['user']).next()
+        self.user = User.query(id__eq=request['token']).next()
         self.factory.channels.setdefault(self.user.channel, []).append(self)
         d = deferToThread(send_unread_messages, self.user.channel, request['last_published_at'])
         d.addCallback(ready_to_receive)
@@ -59,7 +59,7 @@ class ChatProtocol(DnaProtocol):
     def do_publish(self, request):
         message = dict(
             message=request['message'],
-            writer=self.user.username,
+            writer=self.user.id,
             published_at=time.time(),
             method=u'publish'
         )

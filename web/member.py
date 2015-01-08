@@ -21,8 +21,8 @@ def register():
     if cleaned_params is None:
         return abort(400)
     user = User.put_item(
-        username=str(uuid1()),
+        id=str(uuid1()),
         gender=cleaned_params.pop('gender'),
         matching_info=cleaned_params,
     )
-    return jsonify(username=user.username)
+    return jsonify(id=user.id)

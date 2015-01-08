@@ -82,7 +82,7 @@ class CoordinateNormalizer(object):
 
 
 class User(Model):
-    username = StringAttribute(hash_key=True)
+    id = StringAttribute(hash_key=True)
     partner = StringAttribute(null=True)
     channel = StringAttribute(null=True)
     gender = StringAttribute()
@@ -105,7 +105,7 @@ class User(Model):
             return str(x)
 
         return '<User: %s/%s/%s>' % (
-            printable(self.username),
+            printable(self.id),
             printable(self.gender),
             '/'.join([
                 '%s: %s' % (printable(k), printable(v))
