@@ -85,8 +85,10 @@ class User(Model):
     id = StringAttribute(hash_key=True)
     partner = StringAttribute(null=True)
     channel = StringAttribute(null=True)
-    gender = StringAttribute()
-    matching_info = MapAttribute()
+    phone_number = StringAttribute()
+    gender = StringAttribute(null=True)
+    matching_info = MapAttribute(null=True)
+    activated_at = StringAttribute()
 
     @cached_property
     def group_type(self):
