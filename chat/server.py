@@ -1,14 +1,16 @@
 # -*-coding:utf8-*-
+import threading
+import time
+
 import bson
 from bynamodb import patch_dynamodb_connection
 import redis
-import time
 from twisted.internet import reactor
 from twisted.internet.protocol import Factory
 from twisted.internet.threads import deferToThread
+
 from chat import get_config
 from chat.decorators import must_be_in_channel
-
 from chat.dna.protocol import DnaProtocol, ProtocolError
 from chat.transmission import Transmitter
 from models import User, Message
@@ -18,6 +20,8 @@ class ChatProtocol(DnaProtocol):
     def __init__(self):
         self.user = None
         self.status = 'pending'
+        self.pending_messages = []
+        self.pending_messages_lock = threading.Lock()
 
     def requestReceived(self, request):
         processor = getattr(self, 'do_%s' % request.method, None)
@@ -27,17 +31,29 @@ class ChatProtocol(DnaProtocol):
 
     def do_authenticate(self, request):
         def send_unread_messages(channel, published_at):
-            messages = Message.query(channel__eq=channel, published_at__gt=published_at)
-            messages = [dict(
-                writer=message.user,
-                published_at=float(message.published_at),
-                message=message.message
-            ) for message in messages]
-            self.factory.channels.setdefault(self.user.channel, []).append(self)
+            messages = [
+                message.to_dict()
+                for message in Message.query(channel__eq=channel, published_at__gt=published_at)
+            ]
+
+            with self.pending_messages_lock:
+                pending_messages = list(self.pending_messages)
+                self.pending_messages = []
+
+            for message in pending_messages:
+                message = bson.loads(message)
+                del message['method']
+                messages.append(message)
+
             self.transport.write(bson.dumps(dict(method=u'unread', messages=messages)))
 
+        def ready_to_receive(result):
+            self.status = 'stable'
+
         self.user = User.query(username__eq=request['user']).next()
-        deferToThread(send_unread_messages, self.user.channel, request['last_published_at'])
+        self.factory.channels.setdefault(self.user.channel, []).append(self)
+        d = deferToThread(send_unread_messages, self.user.channel, request['last_published_at'])
+        d.addCallback(ready_to_receive)
 
     @must_be_in_channel
     def do_publish(self, request):
@@ -62,7 +78,7 @@ class ChatFactory(Factory):
 
     def __init__(self, redis_host='localhost'):
         self.session = redis.StrictRedis(host=redis_host)
-        RedisSubscriber(self).start()
+        Transmitter(self).start()
 
 
 def run(config_file='localconfig'):
