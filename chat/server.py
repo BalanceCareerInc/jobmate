@@ -50,7 +50,10 @@ class ChatProtocol(DnaProtocol):
         def ready_to_receive(result):
             self.status = 'stable'
 
-        self.user = User.query(id__eq=request['token']).next()
+        try:
+            self.user = User.query(id__eq=request['token']).next()
+        except StopIteration:
+            raise ProtocolError('Authentication failed')
         self.factory.channels.setdefault(self.user.channel, []).append(self)
         d = deferToThread(send_unread_messages, self.user.channel, request['last_published_at'])
         d.addCallback(ready_to_receive)
