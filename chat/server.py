@@ -3,9 +3,6 @@ import bson
 from bynamodb import patch_dynamodb_connection
 import redis
 import time
-
-from threading import Thread
-
 from twisted.internet import reactor
 from twisted.internet.protocol import Factory
 from twisted.internet.threads import deferToThread
@@ -13,6 +10,7 @@ from chat import get_config
 from chat.decorators import must_be_in_channel
 
 from chat.dna.protocol import DnaProtocol, ProtocolError
+from chat.transmission import Transmitter
 from models import User, Message
 
 
@@ -65,20 +63,6 @@ class ChatFactory(Factory):
     def __init__(self, redis_host='localhost'):
         self.session = redis.StrictRedis(host=redis_host)
         RedisSubscriber(self).start()
-
-
-class RedisSubscriber(Thread):
-    def __init__(self, factory):
-        Thread.__init__(self)
-        self.factory = factory
-
-    def run(self):
-        pubsub = self.factory.session.pubsub()
-        pubsub.psubscribe('*')
-        pubsub.listen().next()
-        for message in pubsub.listen():
-            for client in self.factory.channels[message['channel']]:
-                client.transport.write(message['data'])
 
 
 def run(config_file='localconfig'):
