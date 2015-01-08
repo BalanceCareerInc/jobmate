@@ -2,7 +2,7 @@ import os
 
 import member
 
-from flask import Flask
+from flask import Flask, request
 from flask.ext.compress import Compress
 
 from bynamodb import patch_dynamodb_connection
@@ -27,7 +27,8 @@ def create_app(config_file='baseconfig.py'):
 
     @app.after_request
     def allow_access_control(response):
-        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Origin'] = request.headers.get('Origin')
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
         response.headers['Access-Control-Allow-Headers'] = 'content-type,token'
         response.headers['Access-Control-Allow-Methods'] = 'GET,POST,DELETE'
         return response
