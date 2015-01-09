@@ -6,6 +6,7 @@ from flask import Flask, request
 from flask.ext.compress import Compress
 
 from bynamodb import patch_dynamodb_connection
+from web import admin
 from web.session import RedisSessionInterface
 
 
@@ -13,6 +14,7 @@ def create_app(config_file='baseconfig.py'):
     app = Flask(__name__)
     app.config.from_pyfile(os.path.join(os.getcwd(), 'conf', config_file))
 
+    app.register_blueprint(admin.bp, url_prefix='/admin')
     app.register_blueprint(member.bp, url_prefix='/member')
 
     Compress(app)

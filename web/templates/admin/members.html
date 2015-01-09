@@ -1,0 +1,16 @@
+{% extends "admin/base.html" %}
+
+{% block wrap %}
+<table border="1">
+    <thead>
+        <tr>
+            <th>ID</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for user in users %}
+        <tr><td>{{ user.id }}</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
