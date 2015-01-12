@@ -2,7 +2,7 @@
 
 
 def get_config(config_file):
-    with open('conf/%s' % config_file, 'r') as f:
+    with open(config_file, 'r') as f:
         data = f.read()
     config = dict()
     default = dict()
