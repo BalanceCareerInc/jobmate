@@ -88,7 +88,7 @@ def run(config_file='localconfig.py'):
         port=config['DYNAMODB_PORT'],
         is_secure=config['DYNAMODB_IS_SECURE']
     )
-    reactor.listenTCP(9339, ChatFactory(config['REDIS_HOST']))
+    reactor.listenTCP(config.get('PORT', 9339), ChatFactory(config['REDIS_HOST']))
     reactor.run()
 
 
