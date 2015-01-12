@@ -81,7 +81,7 @@ class ChatFactory(Factory):
         Transmitter(self).start()
 
 
-def run(config_file='localconfig.py'):
+def run_dnachat(config_file='localconfig.py'):
     config = get_config(config_file)
     patch_dynamodb_connection(
         host=config['DYNAMODB_HOST'],
@@ -93,4 +93,4 @@ def run(config_file='localconfig.py'):
 
 
 if __name__ == '__main__':
-    run('conf/localconfig.py')
+    run_dnachat('conf/localconfig.py')
