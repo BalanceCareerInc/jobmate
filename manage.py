@@ -5,7 +5,7 @@ import os
 from boto.dynamodb2.layer1 import DynamoDBConnection
 from boto.dynamodb2.table import Table
 
-from chat.server import run
+from dnachat.server import run_dnachat
 from web.app import create_app
 from web.tasks import pairing
 
@@ -53,6 +53,6 @@ if __name__ == '__main__':
     elif args.command == 'runserver':
         app.run(host='0', port=9338, debug=True)
     elif args.command == 'runchatserver':
-        run()
+        run_dnachat('conf/localconfig.py')
     elif args.command == 'pairing':
         pairing()
