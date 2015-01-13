@@ -83,10 +83,12 @@ class CoordinateNormalizer(object):
 
 class User(Model):
     id = StringAttribute(hash_key=True)
+    device_token = StringAttribute(null=True)
+    gender = StringAttribute()
+
     partner = StringAttribute(null=True)
     channel = StringAttribute(null=True)
     matched_at = NumberAttribute(null=True)
-    gender = StringAttribute()
     matching_info = MapAttribute()
 
     @cached_property
