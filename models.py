@@ -149,6 +149,8 @@ class Pair(Model):
 
 
 class Note(Model):
+    # It is vulnerable. Because if notes are created frequently by many users, uuid can be guessed by brute forcing.
+    # TODO: Make permission checkable
     id = StringAttribute(hash_key=True)
     writer_id = StringAttribute()
     title = StringAttribute()
