@@ -56,6 +56,6 @@ if __name__ == '__main__':
         from dnachat.runner import run_dnachat
         run_dnachat('chat/config.py')
     elif args.command == 'pairing':
-        from web.tasks import pairing
+        from web.tasks import find_pairs
         app = create_app('localconfig.py')
-        pairing()
+        find_pairs()
