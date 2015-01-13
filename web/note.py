@@ -1,7 +1,6 @@
 # -*-coding:utf8-*-
-from os import abort
 import uuid
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, abort
 import time
 from models import Note, Comment
 from web.decorators import login_required
@@ -46,6 +45,9 @@ def get_notes():
                 result.append(l2[i2])
                 i2 += 1
         return result + l1[i1:] + l2[i2:]
+
+    if request.user.pair_id is None:
+        return abort(400)
 
     u1, u2 = request.user.pair.user_ids
     u1_notes = Note.query(index_name='WriterIndex', writer_id=u1)
