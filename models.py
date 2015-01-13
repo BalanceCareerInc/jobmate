@@ -166,12 +166,6 @@ class Note(Model):
 
 
 class Comment(Model):
-    id = StringAttribute(hash_key=True)
-    note_id = StringAttribute()
-    published_at = NumberAttribute()
-
-    class NoteIndex(GlobalIndex):
-        read_throughput = 1
-        write_throughput = 1
-
-        hash_key = 'note_id'
+    note_id = StringAttribute(hash_key=True)
+    published_at = NumberAttribute(range_key=True)
+    content = StringAttribute()
