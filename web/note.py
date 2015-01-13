@@ -13,7 +13,8 @@ bp = Blueprint('note', __name__)
 @login_required
 def write():
     required_params = 'title', 'content', 'is_secret'
-    [abort(400) for param in required_params if param not in request.json]
+    if any([param not in request.json for param in required_params]):
+        return abort(400)
 
     note = Note.put_item(
         id=uuid.uuid1(),
