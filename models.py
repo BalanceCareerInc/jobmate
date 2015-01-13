@@ -131,3 +131,11 @@ class User(Model):
                 for k, v in self.matching_info.iteritems()
             ])
         )
+
+
+class Note(Model):
+    id = StringAttribute(hash_key=True)
+    user = StringAttribute()
+    title = StringAttribute()
+    content = StringAttribute()
+    published_at = NumberAttribute()
