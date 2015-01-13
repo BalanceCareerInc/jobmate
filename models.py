@@ -85,7 +85,7 @@ class CoordinateNormalizer(object):
 
 class User(Model):
     id = StringAttribute(hash_key=True)
-    pair = StringAttribute(null=True)
+    pair_id = StringAttribute(null=True)
     nickname = StringAttribute()
 
     device_token = StringAttribute(null=True)
@@ -103,7 +103,7 @@ class User(Model):
 
     @property
     def channel(self):
-        return self.pair
+        return self.pair_id
 
     def push(self, data):
         if not self.endpoint_arn:
@@ -137,14 +137,14 @@ class User(Model):
 
 class Pair(Model):
     id = StringAttribute(hash_key=True)
-    users = SetAttribute()
+    user_ids = SetAttribute()
     matched_at = NumberAttribute()
     title = StringAttribute(null=True)
-    notes = ListAttribute(null=True)
+    note_keys = ListAttribute(null=True)
 
 
 class Note(Model):
-    writer = StringAttribute(hash_key=True)
+    writer_id = StringAttribute(hash_key=True)
     published_at = NumberAttribute(range_key=True)
     title = StringAttribute()
     content = StringAttribute()

@@ -11,11 +11,11 @@ def save_pair(pair):
     u1, u2 = pair
     pair = Pair.put_item(
         id=str(uuid.uuid1()),
-        users={u1, u2},
+        user_ids={u1, u2},
         matched_at=time.time()
     )
-    u1.pair = pair.id
-    u2.pair = pair.id
+    u1.pair_id = pair.id
+    u2.pair_id = pair.id
     u1.save()
     u2.save()
     u1.push(dict(
