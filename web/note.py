@@ -32,6 +32,30 @@ def write_note():
     return jsonify(id=note.id)
 
 
+@bp.route('/notes', methods=['GET'])
+@login_required
+def get_notes():
+    def merge(l1, l2):
+        i1, i2 = 0, 0
+        result = []
+        while i1 < len(l1) and i2 < len(l2):
+            if l1[i1] < l2[i2]:
+                result.append(l1[i1])
+                i1 += 1
+            else:
+                result.append(l2[i2])
+                i2 += 1
+        return result + l1[i1:] + l2[i2:]
+
+    u1, u2 = request.user.pair.user_ids
+    u1_notes = Note.query(index_name='WriterIndex', writer_id=u1)
+    u2_notes = Note.query(index_name='WriterIndex', writer_id=u2)
+    return jsonify(notes=merge(u1_notes, u2_notes))
+
+
+
+
+
 @bp.route('/<path:note_id>', methods=['GET'])
 @login_required
 def get_note(note_id):
