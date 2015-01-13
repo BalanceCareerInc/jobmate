@@ -3,8 +3,11 @@ from uuid import uuid1
 from boto import sns
 
 from flask import Blueprint, request, abort, jsonify, current_app
+import numpy
 
 from models import Coordinate, User
+from web.decorators import login_required
+from web.tasks import save_pair
 
 
 bp = Blueprint('member', __name__)
@@ -36,3 +39,32 @@ def register():
     user.endpoint_arn = response['CreatePlatformEndpointResponse']['CreatePlatformEndpointResult']['EndpointArn']
     user.save()
     return jsonify(username=user.id)
+
+
+@bp.route('/closest', methods=['GET'])
+@login_required
+def find_closest():
+    conditions = dict(
+        partner__null=True,
+        id__ne=request.user.id,
+    )
+    if request.user.gender != 'M':
+        conditions['gender__eq'] = 'F'
+    unmatched_users = User.scan(**conditions)
+
+    closest = (float('inf'), None)
+    base_coordinate = request.user.coordinates
+    for user in unmatched_users:
+        if request.user.group_type != user.group_type:
+            continue
+        distance = numpy.linalg.norm(base_coordinate-user.coordinates)
+        if distance < closest[0]:
+            closest = distance, user
+
+    CRITICAL_DISTANCE = 0.1
+    if closest < CRITICAL_DISTANCE:
+        save_pair(request.user, user)
+        return jsonify(matched=True)
+    else:
+        return jsonify(matched=False)
+
