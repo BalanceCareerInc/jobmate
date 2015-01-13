@@ -172,3 +172,10 @@ class Comment(Model):
     published_at = NumberAttribute(range_key=True)
     writer_id = StringAttribute()
     content = StringAttribute()
+
+
+class DeletedArchive(Model):
+    type = StringAttribute(hash_key=True)
+    deleted_at = NumberAttribute(range_key=True)
+    owner_id = StringAttribute()
+    data = StringAttribute()
