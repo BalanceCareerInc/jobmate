@@ -1,4 +1,6 @@
 # -*-coding:utf8-*-
+from boto import sns
+from flask import json
 from werkzeug.utils import cached_property
 from bynamodb.attributes import StringAttribute, NumberAttribute, MapAttribute
 from bynamodb.model import Model
@@ -99,6 +101,18 @@ class User(Model):
     @cached_property
     def coordinates(self):
         return Coordinate.of(self)
+
+    def push(self, data):
+        if not self.endpoint_arn:
+            raise AttributeError('Attribute endpoint_arn is not set')
+        conn = sns.connect_to_region('ap-northeast-1')
+        gcm_json = json.dumps(dict(data=data), ensure_ascii=False)
+        data = dict(default='default message', GCM=gcm_json)
+        conn.publish(
+            message=json.dumps(data, ensure_ascii=False),
+            target_arn=self.endpoint_arn,
+            message_structure='json'
+        )
 
     def __repr__(self):
         def printable(x):
