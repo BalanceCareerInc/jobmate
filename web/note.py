@@ -3,7 +3,7 @@ from os import abort
 import uuid
 from flask import Blueprint, request, jsonify
 import time
-from models import Note, Pair
+from models import Note
 from web.decorators import login_required
 
 bp = Blueprint('note', __name__)
