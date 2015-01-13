@@ -65,3 +65,26 @@ def get_note(note_id):
         return abort(404)
     comments = Comment.query(note_id=note.id)
     return jsonify(note=jsonable(note), comments=jsonable(comments))
+
+
+@bp.route('/<path:note_id>/comment', methods=['POST'])
+@login_required
+def write_comment(note_id):
+    note = Note.get_item(note_id)
+    if request.user.pair_id is None:
+        return abort(400)
+    if note.writer_id not in request.user.pair.user_ids:
+        return abort(403)
+    if 'content' not in request.json:
+        return abort(400)
+    content = request.json['content'].strip()
+    if not content:
+        return abort(400)
+
+    comment = Comment.put_item(
+        note_id=note.id,
+        published_at=time.time(),
+        writer_id=request.user.id,
+        content=content
+    )
+    return jsonify(note_id=note.id, published_at=float(comment.published_at))
