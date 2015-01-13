@@ -140,7 +140,7 @@ class Pair(Model):
     users = SetAttribute()
     matched_at = NumberAttribute()
     title = StringAttribute(null=True)
-    notes = ListAttribute()
+    notes = ListAttribute(null=True)
 
 
 class Note(Model):
