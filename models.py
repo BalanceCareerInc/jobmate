@@ -1,5 +1,6 @@
 # -*-coding:utf8-*-
 from boto import sns
+from bynamodb.indexes import GlobalIndex
 from flask import json
 from werkzeug.utils import cached_property
 from bynamodb.attributes import StringAttribute, NumberAttribute, MapAttribute, SetAttribute, ListAttribute
@@ -101,6 +102,10 @@ class User(Model):
     def coordinates(self):
         return Coordinate.of(self)
 
+    @cached_property
+    def pair(self):
+        return Pair.get_item(self.pair_id)
+
     @property
     def channel(self):
         return self.pair_id
@@ -140,11 +145,18 @@ class Pair(Model):
     user_ids = SetAttribute()
     matched_at = NumberAttribute()
     title = StringAttribute(null=True)
-    note_keys = ListAttribute(null=True)
+    note_ids = ListAttribute(null=True)
 
 
 class Note(Model):
+    id = StringAttribute()
     writer_id = StringAttribute(hash_key=True)
     published_at = NumberAttribute(range_key=True)
     title = StringAttribute()
     content = StringAttribute()
+
+    class IdIndex(GlobalIndex):
+        read_throughput = 1
+        write_throughput = 1
+
+        hash_key = 'id'
