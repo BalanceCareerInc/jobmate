@@ -3,15 +3,16 @@ from os import abort
 import uuid
 from flask import Blueprint, request, jsonify
 import time
-from models import Note
+from models import Note, Comment
 from web.decorators import login_required
+from web.utils import jsonable
 
 bp = Blueprint('note', __name__)
 
 
-@bp.route('/write', methods=['POST'])
+@bp.route('/', methods=['POST'])
 @login_required
-def write():
+def write_note():
     required_params = 'title', 'content', 'is_secret'
     if any([param not in request.json for param in required_params]):
         return abort(400)
@@ -29,3 +30,11 @@ def write():
     pair.save()
 
     return jsonify(id=note.id)
+
+
+@bp.route('/<path:note_id>', methods=['GET'])
+@login_required
+def get_note(note_id):
+    note = Note.get_item(note_id)
+    comments = Comment.query(note_id=note.id)
+    return jsonify(note=jsonable(note), comments=jsonable(comments))
