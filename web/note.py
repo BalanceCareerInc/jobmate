@@ -1,5 +1,6 @@
 # -*-coding:utf8-*-
 import uuid
+from bynamodb.exceptions import ItemNotFoundException
 from flask import Blueprint, request, jsonify, abort
 import time
 from models import Note, Comment
@@ -55,12 +56,12 @@ def get_notes():
     return jsonify(notes=merge(u1_notes, u2_notes))
 
 
-
-
-
 @bp.route('/<path:note_id>', methods=['GET'])
 @login_required
 def get_note(note_id):
-    note = Note.get_item(note_id)
+    try:
+        note = Note.get_item(note_id)
+    except ItemNotFoundException:
+        return abort(404)
     comments = Comment.query(note_id=note.id)
     return jsonify(note=jsonable(note), comments=jsonable(comments))
