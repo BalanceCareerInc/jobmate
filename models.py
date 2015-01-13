@@ -168,4 +168,5 @@ class Note(Model):
 class Comment(Model):
     note_id = StringAttribute(hash_key=True)
     published_at = NumberAttribute(range_key=True)
+    writer_id = StringAttribute()
     content = StringAttribute()
