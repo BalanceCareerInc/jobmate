@@ -19,8 +19,8 @@ def save_pair(pair):
     u1, u2 = pair
     make_pair(u1, u2)
     make_pair(u2, u1)
-    u1.push(dict(message=u'임시매칭이 되었습니다 확인해보세요!!', matched_at=now))
-    u2.push(dict(message=u'임시매칭이 되었습니다 확인해보세요!!', matched_at=now))
+    u1.push(dict(message=u'임시매칭이 되었습니다 확인해보세요!!', matched_at=now, type='MATCHING'))
+    u2.push(dict(message=u'임시매칭이 되었습니다 확인해보세요!!', matched_at=now, type='MATCHING'))
 
 
 def find_pairs():
