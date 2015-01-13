@@ -2,7 +2,7 @@
 from boto import sns
 from flask import json
 from werkzeug.utils import cached_property
-from bynamodb.attributes import StringAttribute, NumberAttribute, MapAttribute
+from bynamodb.attributes import StringAttribute, NumberAttribute, MapAttribute, SetAttribute
 from bynamodb.model import Model
 
 
@@ -85,14 +85,12 @@ class CoordinateNormalizer(object):
 
 class User(Model):
     id = StringAttribute(hash_key=True)
+    pair = StringAttribute(null=True)
     nickname = StringAttribute()
+
     device_token = StringAttribute(null=True)
     endpoint_arn = StringAttribute(null=True)
     gender = StringAttribute()
-
-    partner = StringAttribute(null=True)
-    channel = StringAttribute(null=True)
-    matched_at = NumberAttribute(null=True)
     matching_info = MapAttribute()
 
     @cached_property
@@ -102,6 +100,10 @@ class User(Model):
     @cached_property
     def coordinates(self):
         return Coordinate.of(self)
+
+    @property
+    def channel(self):
+        return self.pair
 
     def push(self, data):
         if not self.endpoint_arn:
@@ -131,6 +133,13 @@ class User(Model):
                 for k, v in self.matching_info.iteritems()
             ])
         )
+
+
+class Pair(Model):
+    id = StringAttribute(hash_key=True)
+    users = SetAttribute()
+    matched_at = NumberAttribute()
+    title = StringAttribute(null=True)
 
 
 class Note(Model):

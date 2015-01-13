@@ -45,7 +45,7 @@ def register():
 @login_required
 def find_closest():
     conditions = dict(
-        partner__null=True,
+        pair__null=True,
         id__ne=request.user.id,
     )
     if request.user.gender != 'M':
