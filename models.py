@@ -2,7 +2,7 @@
 from boto import sns
 from flask import json
 from werkzeug.utils import cached_property
-from bynamodb.attributes import StringAttribute, NumberAttribute, MapAttribute, SetAttribute
+from bynamodb.attributes import StringAttribute, NumberAttribute, MapAttribute, SetAttribute, ListAttribute
 from bynamodb.model import Model
 
 
@@ -140,11 +140,11 @@ class Pair(Model):
     users = SetAttribute()
     matched_at = NumberAttribute()
     title = StringAttribute(null=True)
+    notes = ListAttribute()
 
 
 class Note(Model):
-    id = StringAttribute(hash_key=True)
-    user = StringAttribute()
+    writer = StringAttribute(hash_key=True)
+    published_at = NumberAttribute(range_key=True)
     title = StringAttribute()
     content = StringAttribute()
-    published_at = NumberAttribute()
