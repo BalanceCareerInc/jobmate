@@ -145,7 +145,7 @@ class Pair(Model):
     user_ids = SetAttribute()
     matched_at = NumberAttribute()
     title = StringAttribute(null=True)
-    note_ids = ListAttribute(null=True)
+    note_ids = ListAttribute(null=True, default=[])
 
 
 class Note(Model):
