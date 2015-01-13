@@ -13,11 +13,13 @@ def jsonable(item):
             return value
 
     if hasattr(item, 'items') and callable(item.items):
-        return dict((key, jsonable_value(value)) for key, value in item.items())
+        return dict((key, jsonable(value)) for key, value in item.items())
     elif isinstance(item, Model):
         return dict(
-            (key, jsonable_value(getattr(item, key)))
+            (key, jsonable(getattr(item, key)))
             for key in item._get_attributes().keys()
         )
     elif isinstance(item, (tuple, list)):
-        return [jsonable_value(value) for value in item]
+        return [jsonable(value) for value in item]
+    else:
+        return jsonable_value(item)
