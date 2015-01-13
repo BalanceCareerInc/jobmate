@@ -85,6 +85,7 @@ class User(Model):
     id = StringAttribute(hash_key=True)
     partner = StringAttribute(null=True)
     channel = StringAttribute(null=True)
+    matched_at = NumberAttribute(null=True)
     gender = StringAttribute()
     matching_info = MapAttribute()
 
