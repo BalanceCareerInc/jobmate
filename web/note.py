@@ -24,7 +24,8 @@ def write():
         content=request.json['content']
     )
 
-    request.pair.note_ids.append(note.id)
-    request.pair.save()
+    pair = request.user.pair
+    pair.note_ids.append(note.id)
+    pair.save()
 
     return jsonify(id=note.id)
