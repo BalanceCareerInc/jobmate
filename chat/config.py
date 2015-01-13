@@ -1,4 +1,4 @@
 from conf.localconfig import *
 
 
-AUTHENTICATOR = 'auth.authenticate'
+AUTHENTICATOR = 'chat.auth.authenticate'
