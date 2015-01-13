@@ -160,7 +160,7 @@ class Note(Model):
         write_throughput = 1
 
         hash_key = 'writer_id'
-        range_key='published_at'
+        range_key = 'published_at'
 
 
 class Comment(Model):
