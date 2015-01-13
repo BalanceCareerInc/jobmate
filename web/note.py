@@ -47,7 +47,7 @@ def get_notes():
                 i2 += 1
         return result + l1[i1:] + l2[i2:]
 
-    if request.user.pair_id is None:
+    if request.user.pair is None:
         return abort(400)
 
     u1, u2 = request.user.pair.user_ids
@@ -71,7 +71,7 @@ def get_note(note_id):
 @login_required
 def write_comment(note_id):
     note = Note.get_item(note_id)
-    if request.user.pair_id is None:
+    if request.user.pair is None:
         return abort(400)
     if note.writer_id not in request.user.pair.user_ids:
         return abort(403)

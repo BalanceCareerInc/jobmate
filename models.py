@@ -104,6 +104,8 @@ class User(Model):
 
     @cached_property
     def pair(self):
+        if self.pair_id is None:
+            return None
         return Pair.get_item(self.pair_id)
 
     @property
