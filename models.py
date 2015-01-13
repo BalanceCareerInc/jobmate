@@ -162,3 +162,8 @@ class Note(Model):
         hash_key = 'writer_id'
         range_key='published_at'
 
+
+class Comment(Model):
+    id = StringAttribute()
+    note_id = StringAttribute()
+    published_at = NumberAttribute()
