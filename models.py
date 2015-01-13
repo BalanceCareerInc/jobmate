@@ -149,14 +149,16 @@ class Pair(Model):
 
 
 class Note(Model):
-    id = StringAttribute()
-    writer_id = StringAttribute(hash_key=True)
-    published_at = NumberAttribute(range_key=True)
+    id = StringAttribute(hash_key=True)
+    writer_id = StringAttribute()
     title = StringAttribute()
     content = StringAttribute()
+    published_at = NumberAttribute()
 
-    class IdIndex(GlobalIndex):
+    class WriterIndex(GlobalIndex):
         read_throughput = 1
         write_throughput = 1
 
-        hash_key = 'id'
+        hash_key = 'writer_id'
+        range_key='published_at'
+
