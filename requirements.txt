@@ -1,4 +1,5 @@
 Flask
+redis
 pytest-flask
 flask-compress
 gunicorn
@@ -8,11 +9,9 @@ gevent
 
 #machine learning
 numpy
-scipy
+#scipy
 scikit-learn
 
 
 #chat
-twisted
-redis
-bson
+-e git+https://github.com/Gaechi/dnachat.git@master#egg=dnachat
