@@ -1,6 +1,9 @@
 # -*-coding:utf8-*-
+from boto import sns
+from bynamodb.indexes import GlobalIndex
+from flask import json
 from werkzeug.utils import cached_property
-from bynamodb.attributes import StringAttribute, NumberAttribute, MapAttribute
+from bynamodb.attributes import StringAttribute, NumberAttribute, MapAttribute, SetAttribute, ListAttribute
 from bynamodb.model import Model
 
 
@@ -83,11 +86,15 @@ class CoordinateNormalizer(object):
 
 class User(Model):
     id = StringAttribute(hash_key=True)
-    partner = StringAttribute(null=True)
-    channel = StringAttribute(null=True)
+    pair_id = StringAttribute(null=True)
+    nickname = StringAttribute()
     phone_number = StringAttribute()
-    gender = StringAttribute(null=True)
-    matching_info = MapAttribute(null=True)
+
+    device_token = StringAttribute(null=True)
+    endpoint_arn = StringAttribute(null=True)
+    gender = StringAttribute()
+    matching_info = MapAttribute()
+
     activated_at = StringAttribute()
 
     @cached_property
@@ -97,6 +104,28 @@ class User(Model):
     @cached_property
     def coordinates(self):
         return Coordinate.of(self)
+
+    @cached_property
+    def pair(self):
+        if self.pair_id is None:
+            return None
+        return Pair.get_item(self.pair_id)
+
+    @property
+    def channel(self):
+        return self.pair_id
+
+    def push(self, data):
+        if not self.endpoint_arn:
+            raise AttributeError('Attribute endpoint_arn is not set')
+        conn = sns.connect_to_region('ap-northeast-1')
+        gcm_json = json.dumps(dict(data=data), ensure_ascii=False)
+        data = dict(default='default message', GCM=gcm_json)
+        conn.publish(
+            message=json.dumps(data, ensure_ascii=False),
+            target_arn=self.endpoint_arn,
+            message_structure='json'
+        )
 
     def __repr__(self):
         def printable(x):
@@ -116,11 +145,40 @@ class User(Model):
         )
 
 
-class Message(Model):
-    channel = StringAttribute(hash_key=True)
-    published_at = NumberAttribute(range_key=True)
-    user = StringAttribute()
-    message = StringAttribute()
+class Pair(Model):
+    id = StringAttribute(hash_key=True)
+    user_ids = SetAttribute()
+    matched_at = NumberAttribute()
+    title = StringAttribute(null=True)
+    note_ids = ListAttribute(null=True, default=[])
 
-    def to_dict(self):
-        return dict(writer=self.user, published_at=self.published_at, message=self.message)
+
+class Note(Model):
+    # It is vulnerable. Because if notes are created frequently by many users, uuid can be guessed by brute forcing.
+    # TODO: Make permission checkable
+    id = StringAttribute(hash_key=True)
+    writer_id = StringAttribute()
+    title = StringAttribute()
+    content = StringAttribute()
+    published_at = NumberAttribute()
+
+    class WriterIndex(GlobalIndex):
+        read_throughput = 1
+        write_throughput = 1
+
+        hash_key = 'writer_id'
+        range_key = 'published_at'
+
+
+class Comment(Model):
+    note_id = StringAttribute(hash_key=True)
+    published_at = NumberAttribute(range_key=True)
+    writer_id = StringAttribute()
+    content = StringAttribute()
+
+
+class DeletedArchive(Model):
+    type = StringAttribute(hash_key=True)
+    deleted_at = NumberAttribute(range_key=True)
+    owner_id = StringAttribute()
+    data = StringAttribute()

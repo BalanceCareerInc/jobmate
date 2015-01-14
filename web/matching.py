@@ -8,7 +8,7 @@ class Matcher(object):
     def __init__(self):
         pass
 
-    def match(self, users):
+    def find_pairs(self, users):
         pairs, unpaired = self._pairing_by_agglomerative(users)
         pairs, rejected = self._reject_homo(pairs)
         unpaired += rejected
@@ -25,7 +25,7 @@ class Matcher(object):
             pairs = pairs + self._pairing_by_brute(unpaired)
             return pairs
 
-        return pairs + self.match(unpaired)
+        return pairs + self.find_pairs(unpaired)
 
     @staticmethod
     def _pairing_by_agglomerative(users):

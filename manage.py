@@ -5,9 +5,7 @@ import os
 from boto.dynamodb2.layer1 import DynamoDBConnection
 from boto.dynamodb2.table import Table
 
-from chat.server import run
 from web.app import create_app
-from web.tasks import pairing
 
 
 def init_db():
@@ -42,17 +40,22 @@ def reset_db():
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('command', choices=['initdb', 'resetdb', 'runserver', 'pairing'])
+    parser.add_argument('command', choices=['initdb', 'resetdb', 'runserver', 'runchatserver', 'pairing'])
     args = parser.parse_args()
-    app = create_app('localconfig.py')
 
     if args.command == 'initdb':
+        app = create_app('localconfig.py')
         init_db()
     elif args.command == 'resetdb':
+        app = create_app('localconfig.py')
         reset_db()
     elif args.command == 'runserver':
+        app = create_app('localconfig.py')
         app.run(host='0', port=9338, debug=True)
     elif args.command == 'runchatserver':
-        run()
+        from dnachat.runner import run_dnachat
+        run_dnachat('chat/config.py')
     elif args.command == 'pairing':
-        pairing()
+        from web.tasks import find_pairs
+        app = create_app('localconfig.py')
+        find_pairs()

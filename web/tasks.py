@@ -4,20 +4,37 @@ import uuid
 from collections import defaultdict
 
 from web.matching import Matcher
-from models import User
+from models import User, Pair
 
 
-def pairing():
-    users = User.scan(partner__null=True)
+def save_pair(pair):
+    u1, u2 = pair
+    pair = Pair.put_item(
+        id=str(uuid.uuid1()),
+        user_ids={u1, u2},
+        matched_at=time.time()
+    )
+    u1.pair_id = pair.id
+    u2.pair_id = pair.id
+    u1.save()
+    u2.save()
+    u1.push(dict(
+        message=u'임시매칭이 되었습니다 확인해보세요!!',
+        matched_at=pair.matched_at,
+        type='MATCHING'
+    ))
+    u2.push(dict(
+        message=u'임시매칭이 되었습니다 확인해보세요!!',
+        matched_at=pair.matched_at,
+        type='MATCHING'
+    ))
+
+
+def find_pairs():
+    users = User.scan(pair__null=True)
     group_users = defaultdict(list)
-    [group_users[user.group_type].append(user)for user in users]
+    [group_users[user.group_type].append(user) for user in users]
     for group, users in group_users.iteritems():
-        pairs = Matcher().match(users)
-        for u1, u2 in pairs:
-            channel = '%f-%s' % (time.time(), uuid.uuid1())
-            u1.partner = u2.id
-            u2.partner = u1.id
-            u1.channel = channel
-            u2.channel = channel
-            u1.save()
-            u2.save()
+        pairs = Matcher().find_pairs(users)
+        for pair in pairs:
+            save_pair(pair)
