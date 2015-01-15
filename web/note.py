@@ -6,7 +6,7 @@ from flask import Blueprint, request, jsonify, abort
 import time
 from models import Note, Comment, DeletedArchive
 from web.decorators import login_required
-from web.utils import jsonable
+from web.utils.misc import jsonable
 
 bp = Blueprint('note', __name__)
 

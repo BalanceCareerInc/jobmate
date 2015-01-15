@@ -1,3 +1,4 @@
+# -*-coding:utf8-*-
 from boto.dynamodb.types import convert_num
 from decimal import Decimal
 from bynamodb.model import Model
