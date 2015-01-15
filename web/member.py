@@ -1,7 +1,8 @@
 # -*-coding:utf8-*-
-import datetime
 import numpy
 import random
+import time
+
 from uuid import uuid1
 
 from boto import sns
@@ -31,8 +32,6 @@ def send_auth_sms():
         session['phone_number'] = phone_number
         session['auth_number'] = str(random.randint(10000, 99999))
     send_sms(phone_number, u'[입사동기]\n인증번호: {0}'.format(session['auth_number']))
-    print session
-    print request.headers
     return jsonify(status=True)
 
 
@@ -45,11 +44,11 @@ def auth_phone_number():
 
     del session['auth_number']
 
-    redis_session = redis.StrictRedis(current_app['REDIS_HOST'])
+    redis_session = redis.StrictRedis(current_app.config['REDIS_HOST'])
     key = str(uuid1())
     redis_session.set(key, session['phone_number'])
     redis_session.expire(key, 60 * 60 * 24)
-    return key, 202
+    return jsonify(key=key), 202
 
 
 @bp.route('/register', methods=['POST'])
@@ -62,7 +61,7 @@ def register():
         return params
 
     redis_key = request.json['key']
-    redis_session = redis.StrictRedis(current_app['REDIS_HOST'])
+    redis_session = redis.StrictRedis(current_app.config['REDIS_HOST'])
     phone_number = redis_session.get(redis_key)
     redis_session.delete(redis_key)
 
@@ -78,6 +77,7 @@ def register():
         id=str(uuid1()),
         phone_number=phone_number,
         matching_info=cleaned_params,
+        activated_at=time.time(),
         **basic_info
     )
 

@@ -1,7 +1,7 @@
 # -*-coding:utf8-*-
 from collections import namedtuple
 from boto import sns
-from bynamodb.indexes import GlobalIndex
+from bynamodb.indexes import GlobalIndex, GlobalAllIndex
 from flask import json
 from werkzeug.utils import cached_property
 from bynamodb.attributes import StringAttribute, NumberAttribute, MapAttribute, SetAttribute, ListAttribute
@@ -181,7 +181,7 @@ class Note(Model):
     content = StringAttribute()
     published_at = NumberAttribute()
 
-    class WriterIndex(GlobalIndex):
+    class WriterIndex(GlobalAllIndex):
         read_throughput = 1
         write_throughput = 1
 

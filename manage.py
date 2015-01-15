@@ -56,7 +56,7 @@ if __name__ == '__main__':
         os.execv('/usr/bin/java', [
             '-Djava.net.preferIPv4Stack=true',
             '-Djava.library.path=./dynamodb/DynamoDBLocal_lib', '-jar',
-            'dynamodb/DynamoDBLocal.jar', '-port', '8001',
+            'dynamodb/DynamoDBLocal.jar', '-port', '8000',
         ])
     elif args.command == 'runserver':
         app = create_app('localconfig.py')
