@@ -40,7 +40,10 @@ def reset_db():
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('command', choices=['initdb', 'resetdb', 'runserver', 'runchatserver', 'pairing'])
+    parser.add_argument('command', choices=[
+        'initdb', 'resetdb', 'runserver', 'runchatserver', 'pairing',
+        'rundb'
+    ])
     args = parser.parse_args()
 
     if args.command == 'initdb':
@@ -49,6 +52,12 @@ if __name__ == '__main__':
     elif args.command == 'resetdb':
         app = create_app('localconfig.py')
         reset_db()
+    elif args.command == 'rundb':
+        os.execv('/usr/bin/java', [
+            '-Djava.net.preferIPv4Stack=true',
+            '-Djava.library.path=./dynamodb/DynamoDBLocal_lib', '-jar',
+            'dynamodb/DynamoDBLocal.jar', '-port', '8001',
+        ])
     elif args.command == 'runserver':
         app = create_app('localconfig.py')
         app.run(host='0', port=9338, debug=True)
