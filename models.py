@@ -1,10 +1,28 @@
 # -*-coding:utf8-*-
+from collections import namedtuple
 from boto import sns
 from bynamodb.indexes import GlobalIndex
 from flask import json
 from werkzeug.utils import cached_property
 from bynamodb.attributes import StringAttribute, NumberAttribute, MapAttribute, SetAttribute, ListAttribute
 from bynamodb.model import Model
+
+
+class CoordinateGroup(namedtuple('CoordinateGroup', ['name', 'default', 'cases'])):
+    def __new__(cls, name, default=None, cases=None):
+        if cases is None:
+            cases = dict()
+        elif not isinstance(cases, dict):
+            raise TypeError('Children have to be a dict, not "%s"' % type(cases))
+        for children in cases.values():
+            if not isinstance(children, (tuple, list)):
+                raise TypeError('Type of all cases values have to be '
+                                'list or tuple, not "%s"' % type(children))
+            for child in children:
+                if not isinstance(child, cls):
+                    raise TypeError('Type of all child of cases value have to be '
+                                    'CoordinateGroup, not "%s"' % type(child))
+        return super(CoordinateGroup, cls).__new__(cls, name, default, cases)
 
 
 class Coordinate(Model):
