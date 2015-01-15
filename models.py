@@ -113,7 +113,7 @@ class User(Model):
     gender = StringAttribute()
     matching_info = MapAttribute()
 
-    activated_at = StringAttribute()
+    activated_at = NumberAttribute()
 
     @cached_property
     def group_type(self):
