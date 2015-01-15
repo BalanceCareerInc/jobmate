@@ -26,8 +26,17 @@ class CoordinateGroup(namedtuple('CoordinateGroup', ['name', 'default', 'cases']
 
 
 class Coordinate(Model):
-    DEFAULT_GROUPS = 'university', 'age'
-    GROUP_TYPE_CRITERIA = 'looking_for_now', 'orientation'
+    GROUPS = [
+        CoordinateGroup('age'),
+        CoordinateGroup('school-type', cases=dict(undergraduate=[
+            CoordinateGroup('university'),
+            CoordinateGroup('major')
+        ])),
+        CoordinateGroup('apply-type'),
+        CoordinateGroup('orientation'),
+        CoordinateGroup('looking-for-now')
+    ]
+    GROUP_TYPE_CRITERIA = 'looking-for-now', 'orientation'
     GROUP_WEIGHT = dict(
         university=10,
         recruit_exp=10,
@@ -47,27 +56,19 @@ class Coordinate(Model):
 
     @classmethod
     def of(cls, user):
-        group_type_name = {
-            (True, 'etc'): 'now_etc',
-            (False, 'etc'): 'future_etc'
-        }[user.group_type]
-        groups = list(Coordinate.DEFAULT_GROUPS) + \
-            getattr(cls, '_groups_of_%s' % group_type_name)(user)
+        def group_value_pairs(groups):
+            pairs = []
+            for group in groups:
+                value = user.matching_info[group]
+                pairs.append((group, value))
+                if value in group.cases:
+                    pairs += group_value_pairs(group.cases[value])
+            return pairs
         normalizer = CoordinateNormalizer()
         return [
-            value
-            for group in groups
-            for value in normalizer.normalize(group, user.matching_info[group])
+            normalizer.normalize(group, value)
+            for group, value in group_value_pairs(cls.GROUPS)
         ]
-
-    @classmethod
-    def _groups_of_future_etc(cls, user):
-        return []
-
-    @classmethod
-    def _groups_of_now_etc(cls, user):
-        return []
-        return ['recruit_exp', 'goal_companies']
 
 
 class CoordinateNormalizer(object):
@@ -105,15 +106,15 @@ class CoordinateNormalizer(object):
 class User(Model):
     id = StringAttribute(hash_key=True)
     pair_id = StringAttribute(null=True)
-    nickname = StringAttribute(null=True)
+    nickname = StringAttribute()
     phone_number = StringAttribute()
+    gender = StringAttribute()
+    activated_at = NumberAttribute()
 
     device_token = StringAttribute(null=True)
     endpoint_arn = StringAttribute(null=True)
-    gender = StringAttribute(null=True)
-    matching_info = MapAttribute(null=True)
+    matching_info = MapAttribute()
 
-    activated_at = NumberAttribute()
 
     @cached_property
     def group_type(self):
