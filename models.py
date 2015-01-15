@@ -105,13 +105,13 @@ class CoordinateNormalizer(object):
 class User(Model):
     id = StringAttribute(hash_key=True)
     pair_id = StringAttribute(null=True)
-    nickname = StringAttribute()
+    nickname = StringAttribute(null=True)
     phone_number = StringAttribute()
 
     device_token = StringAttribute(null=True)
     endpoint_arn = StringAttribute(null=True)
-    gender = StringAttribute()
-    matching_info = MapAttribute()
+    gender = StringAttribute(null=True)
+    matching_info = MapAttribute(null=True)
 
     activated_at = NumberAttribute()
 
