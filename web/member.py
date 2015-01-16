@@ -57,10 +57,10 @@ def register():
         default_keys = list(BASIC_INFO_KEYS) + [group.name for group in Coordinate.GROUPS]
         if not all([key in params for key in default_keys]):
             return None
-        params.update(looking_for_now=True, orientation='etc')
         return params
 
     redis_key = request.json['key']
+    del request.json['key']
     redis_session = redis.StrictRedis(current_app.config['REDIS_HOST'])
     phone_number = redis_session.get(redis_key)
     redis_session.delete(redis_key)

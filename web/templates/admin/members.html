@@ -5,11 +5,33 @@
     <thead>
         <tr>
             <th>ID</th>
+            <th>Nickname</th>
+            <th>PhoneNumber</th>
+            <th>Gender</th>
+            <th>Etc</th>
         </tr>
     </thead>
     <tbody>
     {% for user in users %}
-        <tr><td>{{ user.id }}</td></tr>
+        <tr>
+            <td>{{ user.id }}</td>
+            <td>{{ user.nickname }}</td>
+            <td>{{ user.phone_number }}</td>
+            <td>{{ user.gender }}</td>
+            <td>
+                {% for key, value in user.matching_info.items() %}
+                    {% if value is iterable and value is not string %}
+                        {{ key }}:
+                        {% for value2 in value %}
+                            {{ value2 }},
+                        {% endfor %}
+                        <br>
+                    {% else %}
+                        {{ key }}: {{ value }}<br>
+                    {% endif %}
+                {% endfor %}
+            </td>
+        </tr>
     {% endfor %}
     </tbody>
 </table>

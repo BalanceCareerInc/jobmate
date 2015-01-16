@@ -1,7 +1,7 @@
 # -*-coding:utf8-*-
 from collections import namedtuple
 from boto import sns
-from bynamodb.indexes import GlobalIndex, GlobalAllIndex
+from bynamodb.indexes import GlobalAllIndex
 from flask import json
 from werkzeug.utils import cached_property
 from bynamodb.attributes import StringAttribute, NumberAttribute, MapAttribute, SetAttribute, ListAttribute
@@ -27,22 +27,22 @@ class CoordinateGroup(namedtuple('CoordinateGroup', ['name', 'default', 'cases']
 
 class Coordinate(Model):
     GROUPS = [
-        CoordinateGroup('age'),
-        CoordinateGroup('school-type', cases=dict(undergraduate=[
-            CoordinateGroup('university'),
-            CoordinateGroup('major')
+        CoordinateGroup(u'나이'),
+        CoordinateGroup(u'최종학력', cases=dict(undergraduate=[
+            CoordinateGroup(u'학교'),
+            CoordinateGroup(u'전공')
         ])),
-        CoordinateGroup('apply-type'),
-        CoordinateGroup('orientation'),
-        CoordinateGroup('looking-for-now')
+        CoordinateGroup(u'지원전형'),
+        CoordinateGroup(u'취업방향'),
+        CoordinateGroup(u'looking-for-now')
     ]
-    GROUP_TYPE_CRITERIA = 'looking-for-now', 'orientation'
-    GROUP_WEIGHT = dict(
-        university=10,
-        recruit_exp=10,
-        goal_companies=9,
-        age=2
-    )
+    GROUP_TYPE_CRITERIA = 'looking-for-now', u'취업방향'
+    GROUP_WEIGHT = {
+        u'학교': 10,
+        'recruit_exp': 10,
+        'goal_companies': 9,
+        'age': 2
+    }
     __fixtures__ = 'university', 'recruit_exp', 'goal_companies'
 
     name = StringAttribute(hash_key=True)
