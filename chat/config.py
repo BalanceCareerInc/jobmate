@@ -1,4 +1,5 @@
 from conf.localconfig import *
 
 
-AUTHENTICATOR = 'chat.auth.authenticate'
+AUTHENTICATOR = 'chat.func.authenticate'
+SUBSCRIBERS_RESOLVER = 'chat.func.subscribers'
