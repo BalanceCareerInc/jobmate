@@ -12,6 +12,7 @@ def init_db():
     import inspect
     import json
     from bynamodb.model import Model
+    from dnachat import models as dna_models
     import models
 
     def load_fixture(model, fixture):
@@ -22,6 +23,7 @@ def init_db():
     conn = DynamoDBConnection()
     table_names = conn.list_tables()['TableNames']
     models_ = [getattr(models, name) for name in dir(models)]
+    models_ += [getattr(dna_models, name) for name in dir(dna_models)]
     models_ = [model for model in models_
                if inspect.isclass(model) and issubclass(model, Model) and not model == Model]
     for model in models_:
@@ -42,7 +44,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('command', choices=[
         'initdb', 'resetdb', 'runserver', 'runchatserver', 'pairing',
-        'rundb'
+        'rundb', 'runchatlogserver', 'runchatnotisender'
     ])
     args = parser.parse_args()
 
@@ -64,6 +66,12 @@ if __name__ == '__main__':
     elif args.command == 'runchatserver':
         from dnachat.runner import run_dnachat
         run_dnachat('chat/config.py')
+    elif args.command == 'runchatlogserver':
+        from dnachat.runner import run_logger
+        run_logger('chat/config.py')
+    elif args.command == 'runchatnotisender':
+        from dnachat.runner import run_notisender
+        run_notisender('chat/config.py')
     elif args.command == 'pairing':
         from web.tasks import find_pairs
         app = create_app('localconfig.py')
