@@ -37,8 +37,10 @@ class RedisSessionInterface(SessionInterface):
     def open_session(self, app, request):
         sid = request.cookies.get(app.session_cookie_name)
         if not sid:
-            sid = self.generate_sid()
-            return self.session_class(sid=sid, new=True)
+            sid = request.args.get('sid')
+            if not sid:
+                sid = self.generate_sid()
+                return self.session_class(sid=sid, new=True)
         val = self.redis.get(self.prefix + sid)
         if val is not None:
             data = self.serializer.loads(val)
