@@ -32,14 +32,14 @@ def send_auth_sms():
         session['phone_number'] = phone_number
         session['auth_number'] = str(random.randint(10000, 99999))
     send_sms(phone_number, u'[입사동기]\n인증번호: {0}'.format(session['auth_number']))
-    return jsonify(status=True)
+    return jsonify(status=True, sid=session.sid)
 
 
 @bp.route('/auth-sms/', methods=['POST'])
 def auth_phone_number():
     user_input_number = request.json.get('auth_number')
 
-    if user_input_number != session['auth_number']:
+    if str(user_input_number) != session['auth_number']:
         return abort(400)
 
     del session['auth_number']
